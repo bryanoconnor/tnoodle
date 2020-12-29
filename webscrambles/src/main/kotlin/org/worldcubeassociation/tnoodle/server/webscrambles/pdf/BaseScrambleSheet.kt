@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream
 
 abstract class BaseScrambleSheet(val scrambleSet: ScrambleSet, val activityCode: ActivityCode) : BasePdfSheet<PdfWriter>() {
     override fun openDocument() =
-        Document(PAGE_SIZE, 0f, 0f, 75f, 75f).apply {
+        Document(PAGE_SIZE, 0f, 0f, 0f, 0f).apply {
             addCreationDate()
             addProducer()
             addTitle(activityCode.compileTitleString(Translate.DEFAULT_LOCALE))

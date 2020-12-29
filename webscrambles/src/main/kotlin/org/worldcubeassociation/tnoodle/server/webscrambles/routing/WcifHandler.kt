@@ -128,11 +128,11 @@ class WcifHandler(val environmentConfig: ServerEnvironmentConfig) : RouteHandler
                     val pdfPassword = req.request.pdfPassword
                     val zipPassword = req.request.zipPassword
 
-                    val zip = WCIFDataBuilder.wcifToZip(wcif, pdfPassword, generationDate, environmentConfig.title, req.requestUrl)
-                    val bytes = zip.compress(zipPassword)
+                    val bytes = WCIFDataBuilder.wcifToZip(wcif, pdfPassword, generationDate, environmentConfig.title, req.requestUrl)
+                    //val bytes = zip.compress(zipPassword)
 
                     backend.onProgress(WORKER_PDF)
-                    ContentType.Application.Zip to bytes
+                    ContentType.Application.Json to bytes
                 }
 
                 registerJobPaths(job)

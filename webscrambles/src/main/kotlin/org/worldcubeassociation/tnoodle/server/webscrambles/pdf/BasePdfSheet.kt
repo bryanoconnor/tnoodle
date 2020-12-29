@@ -2,6 +2,7 @@ package org.worldcubeassociation.tnoodle.server.webscrambles.pdf
 
 import com.itextpdf.text.Document
 import com.itextpdf.text.PageSize
+import com.itextpdf.text.RectangleReadOnly
 import com.itextpdf.text.pdf.PdfWriter
 import java.io.ByteArrayOutputStream
 
@@ -42,6 +43,6 @@ abstract class BasePdfSheet<W : PdfWriter> : PdfContent {
     open fun finalise(processedBytes: ByteArrayOutputStream, password: String?): ByteArray = processedBytes.toByteArray()
 
     companion object {
-        val PAGE_SIZE = PageSize.LETTER
+        val PAGE_SIZE = RectangleReadOnly(450F, 300F)
     }
 }

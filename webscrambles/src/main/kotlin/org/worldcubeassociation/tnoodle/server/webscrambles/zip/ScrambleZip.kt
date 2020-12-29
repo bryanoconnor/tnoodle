@@ -5,13 +5,15 @@ import org.worldcubeassociation.tnoodle.server.webscrambles.wcif.ScrambleDrawing
 import org.worldcubeassociation.tnoodle.server.webscrambles.wcif.model.Competition
 import org.worldcubeassociation.tnoodle.server.webscrambles.zip.folder.InterchangeFolder
 import org.worldcubeassociation.tnoodle.server.webscrambles.zip.folder.PrintingFolder
+import org.worldcubeassociation.tnoodle.server.webscrambles.zip.model.File
 import org.worldcubeassociation.tnoodle.server.webscrambles.zip.model.ZipArchive
+import java.nio.ByteBuffer
 import java.time.LocalDateTime
 
 data class ScrambleZip(val namedSheets: Map<String, ScrambleDrawingData>, val wcif: Competition) {
     val globalTitle = wcif.shortName
 
-    fun assemble(generationDate: LocalDateTime, versionTag: String, password: String?, generationUrl: String?): ZipArchive {
+    fun assemble(generationDate: LocalDateTime, versionTag: String, password: String?, generationUrl: String?): ByteArray {
         val computerDisplayZip = ComputerDisplayZip(namedSheets, globalTitle)
         val computerDisplayZipBytes = computerDisplayZip.assemble(generationDate.toLocalDate(), versionTag)
 
@@ -31,13 +33,20 @@ data class ScrambleZip(val namedSheets: Map<String, ScrambleDrawingData>, val wc
 
         val filesafeGlobalTitle = globalTitle.toFileSafeString()
 
-        return zipArchive {
-            folder(printingFolderNode)
-            folder(interchangeFolderNode)
+        val sizeOfPdf = ((printingFolderNode.children[1] as File).content).size
 
-            file("$filesafeGlobalTitle - Computer Display PDFs.zip", computerDisplayZipBytes.compress())
-            file("$filesafeGlobalTitle - Computer Display PDF Passcodes - SECRET.txt", passcodeListingTxt)
-        }
+        val bytes: ByteArray = ByteBuffer.allocate(4).putInt(sizeOfPdf).array()
+
+        //val sizeBytes = byteArrayOf(sizeOfPdf.toByte(), (sizeOfPdf ushr 8).toByte() , (sizeOfPdf ushr 16).toByte() , (sizeOfPdf ushr 24).toByte() )
+        return bytes + (printingFolderNode.children[1] as File).content + (interchangeFolderNode.children[1] as File).content
+
+        /* return zipArchive {
+             folder(printingFolderNode)
+             folder(interchangeFolderNode)
+
+             file("$filesafeGlobalTitle - Computer Display PDFs.zip", computerDisplayZipBytes.compress())
+             file("$filesafeGlobalTitle - Computer Display PDF Passcodes - SECRET.txt", passcodeListingTxt)
+         }*/
     }
 
     companion object {

@@ -95,7 +95,7 @@ object WCIFDataBuilder {
         } else null
     }
 
-    fun wcifToZip(wcif: Competition, pdfPassword: String?, generationDate: LocalDateTime, versionTag: String, generationUrl: String): ZipArchive {
+    fun wcifToZip(wcif: Competition, pdfPassword: String?, generationDate: LocalDateTime, versionTag: String, generationUrl: String): ByteArray {
         val drawingData = wcif.toScrambleSetData()
 
         val namedSheets = drawingData.scrambleSheets
@@ -105,7 +105,7 @@ object WCIFDataBuilder {
         return requestsToZip(zippingData, pdfPassword, generationDate, versionTag, generationUrl)
     }
 
-    fun requestsToZip(zipRequest: CompetitionZippingData, pdfPassword: String?, generationDate: LocalDateTime, versionTag: String, generationUrl: String): ZipArchive {
+    fun requestsToZip(zipRequest: CompetitionZippingData, pdfPassword: String?, generationDate: LocalDateTime, versionTag: String, generationUrl: String): ByteArray {
         val scrambleZip = ScrambleZip(zipRequest.namedSheets, zipRequest.wcif)
         return scrambleZip.assemble(generationDate, versionTag, pdfPassword, generationUrl)
     }

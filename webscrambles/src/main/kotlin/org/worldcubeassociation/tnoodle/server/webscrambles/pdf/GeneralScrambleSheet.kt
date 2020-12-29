@@ -17,11 +17,11 @@ class GeneralScrambleSheet(scrambleSet: ScrambleSet, activityCode: ActivityCode)
     override fun PdfWriter.writeContents(document: Document) {
         val pageSize = document.pageSize
 
-        val availableWidth = pageSize.width - 2 * HORIZONTAL_MARGIN
-        val availableHeight = pageSize.height - 2 * VERTICAL_MARGIN
+        val availableWidth = pageSize.width// - 2 * HORIZONTAL_MARGIN
+        val availableHeight = pageSize.height// - 2 * VERTICAL_MARGIN
 
-        val headerAndFooterHeight = availableHeight / WatermarkPdfWrapper.HEADER_AND_FOOTER_HEIGHT_RATIO
-        val extraScrambleLabelHeight = if (scrambleSet.extraScrambles.isNotEmpty()) availableHeight / EXTRA_SCRAMBLES_HEIGHT_RATIO else 0f
+        val headerAndFooterHeight = 1//availableHeight / WatermarkPdfWrapper.HEADER_AND_FOOTER_HEIGHT_RATIO
+        val extraScrambleLabelHeight = 1//if (scrambleSet.extraScrambles.isNotEmpty()) availableHeight / EXTRA_SCRAMBLES_HEIGHT_RATIO else 0f
 
         val indexColumnWidth = availableWidth / INDEX_COLUMN_WIDTH_RATIO
 
@@ -29,10 +29,10 @@ class GeneralScrambleSheet(scrambleSet: ScrambleSet, activityCode: ActivityCode)
         val allScramblesHeight = availableHeight - 2 * headerAndFooterHeight - extraScrambleLabelHeight
 
         val scramblesPerPage = min(MAX_SCRAMBLES_PER_PAGE, scrambleSet.allScrambles.size)
-        val maxScrambleImageHeight = (allScramblesHeight / scramblesPerPage - 2 * SCRAMBLE_IMAGE_PADDING).toInt()
+        val maxScrambleImageHeight = 300//(allScramblesHeight / scramblesPerPage - 2 * SCRAMBLE_IMAGE_PADDING).toInt()
 
         // We don't let scramble images take up too much of a the page
-        val maxScrambleImageWidth = (availableWidth / MAX_SCRAMBLE_IMAGE_RATIO).toInt()
+        val maxScrambleImageWidth = 500//(availableWidth / MAX_SCRAMBLE_IMAGE_RATIO).toInt()
 
         val scrambleImageSize = scramblingPuzzle.getPreferredSize(maxScrambleImageWidth, maxScrambleImageHeight)
 
@@ -53,7 +53,7 @@ class GeneralScrambleSheet(scrambleSet: ScrambleSet, activityCode: ActivityCode)
         document.add(table)
 
         // Maybe add extra scrambles
-        if (scrambleSet.extraScrambles.isNotEmpty()) {
+        /*if (scrambleSet.extraScrambles.isNotEmpty()) {
             val headerTable = PdfPTable(1).apply {
                 setTotalWidth(floatArrayOf(availableWidth))
                 isLockedWidth = true
@@ -71,7 +71,7 @@ class GeneralScrambleSheet(scrambleSet: ScrambleSet, activityCode: ActivityCode)
 
             val extraTable = directContent.createTable(scrambleColumnWidth, indexColumnWidth, scrambleFont, scrambleImageSize, scrambleSet.extraScrambles, EXTRA_SCRAMBLE_PREFIX, useHighlighting)
             document.add(extraTable)
-        }
+        }*/
     }
 
     private fun getFontConfiguration(availableArea: Rectangle, scrambles: List<String>): Font {
@@ -97,8 +97,8 @@ class GeneralScrambleSheet(scrambleSet: ScrambleSet, activityCode: ActivityCode)
 
     private fun PdfContentByte.createTable(scrambleColumnWidth: Float, indexColumnWidth: Float, scrambleFont: Font, scrambleImageSize: Dimension, scrambles: List<Scramble>, scrambleNumberPrefix: String, useHighlighting: Boolean): PdfPTable {
 
-        val table = PdfPTable(3).apply {
-            setTotalWidth(floatArrayOf(indexColumnWidth, scrambleColumnWidth, (scrambleImageSize.width + 2 * SCRAMBLE_IMAGE_PADDING).toFloat()))
+        val table = PdfPTable(1).apply {
+            setTotalWidth(floatArrayOf((scrambleImageSize.width + 2 * SCRAMBLE_IMAGE_PADDING).toFloat()))
             isLockedWidth = true
         }
 
@@ -109,7 +109,7 @@ class GeneralScrambleSheet(scrambleSet: ScrambleSet, activityCode: ActivityCode)
                 verticalAlignment = PdfPCell.ALIGN_MIDDLE
                 horizontalAlignment = PdfPCell.ALIGN_CENTER
             }
-            table.addCell(indexCell)
+            //table.addCell(indexCell)
 
             val lineChunks = scramble.splitToLineChunks(scrambleFont, scrambleColumnWidth)
             val scramblePhrase = Phrase()
@@ -128,18 +128,18 @@ class GeneralScrambleSheet(scrambleSet: ScrambleSet, activityCode: ActivityCode)
                 verticalAlignment = PdfPCell.ALIGN_MIDDLE
             }
 
-            table.addCell(scrambleCell)
+            //table.addCell(scrambleCell)
 
             if (scrambleImageSize.width > 0 && scrambleImageSize.height > 0) {
                 val svg = scramblingPuzzle.drawScramble(scramble, null)
                 val tp = renderSvgToPDF(svg, scrambleImageSize, SCRAMBLE_IMAGE_PADDING)
 
                 val imgCell = PdfPCell(Image.getInstance(tp), true).apply {
-                    backgroundColor = BaseColor.LIGHT_GRAY
+                    backgroundColor = BaseColor.WHITE
                     verticalAlignment = PdfPCell.ALIGN_MIDDLE
                     horizontalAlignment = PdfPCell.ALIGN_MIDDLE
                 }
-
+                imgCell.setBorder(Rectangle.NO_BORDER)
                 table.addCell(imgCell)
             } else {
                 table.addCell(EMPTY_CELL_CONTENT)
