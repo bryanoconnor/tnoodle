@@ -31,20 +31,10 @@ class TNoodleServer(val environmentConfig: ServerEnvironmentConfig) : Applicatio
 
         app.install(CORS)
         {
-            //server configs....below
-            //anyHost()
-            //method(HttpMethod.Put)
-
-            method(HttpMethod.Options)
+            method(HttpMethod.Put)
             header(HttpHeaders.XForwardedProto)
-            //anyHost()
-            //host("my-host")
-            host("localhost:3000")
-            // host("my-host", subDomains = listOf("www"))
-            // host("my-host", schemes = listOf("http", "https"))
-            allowCredentials = true
-            allowNonSimpleContentTypes = true
-            //maxAge = Duration.ofDays(1)
+            anyHost() // change this to specific host!!
+            //host("localhost:3000")
         }
 
         app.install(ContentNegotiation) {
