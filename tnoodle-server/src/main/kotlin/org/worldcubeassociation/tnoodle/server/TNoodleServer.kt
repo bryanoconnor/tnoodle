@@ -34,6 +34,8 @@ class TNoodleServer(val environmentConfig: ServerEnvironmentConfig) : Applicatio
             method(HttpMethod.Options)
             header(HttpHeaders.XForwardedProto)
             anyHost()
+            allowCredentials = true
+            allowNonSimpleContentTypes = true
         }
 
         app.install(ContentNegotiation) {
