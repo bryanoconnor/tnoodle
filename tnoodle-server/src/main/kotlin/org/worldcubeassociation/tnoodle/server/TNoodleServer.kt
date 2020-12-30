@@ -31,10 +31,9 @@ class TNoodleServer(val environmentConfig: ServerEnvironmentConfig) : Applicatio
 
         app.install(CORS)
         {
-            method(HttpMethod.Put)
+            method(HttpMethod.Options)
             header(HttpHeaders.XForwardedProto)
-            anyHost() // change this to specific host!!
-            //host("localhost:3000")
+            anyHost()
         }
 
         app.install(ContentNegotiation) {
