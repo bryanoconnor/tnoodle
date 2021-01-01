@@ -1,34 +1,22 @@
-# We select the base image from. Locally available or from https://hub.docker.com/
-FROM openjdk:8-jre-alpine
+# Use the official gradle image to create a build artifact.
+# https://hub.docker.com/_/gradle
+FROM gradle as builder
 
-RUN apk add --no-cache fontconfig ttf-dejavu
-RUN ln -s /usr/lib/libfontconfig.so.1 /usr/lib/libfontconfig.so && \
-    ln -s /lib/libuuid.so.1 /usr/lib/libuuid.so.1 && \
-    ln -s /lib/libc.musl-x86_64.so.1 /usr/lib/libc.musl-x86_64.so.1
-ENV LD_LIBRARY_PATH /usr/lib
+# Copy local code to the container image.
+COPY . ./
+COPY gitCopy/ ./.git
 
-# We define the user we will use in this instance to prevent using root that even in a container, can be a security risk.
-ENV APPLICATION_USER=ktor
+# Build a release artifact.
+RUN gradle :webscrambles:shadowJar --no-daemon --warning-mode all --stacktrace
 
-# Then we add the user, create the /app folder and give permissions to our user.
-RUN adduser -D -g '' $APPLICATION_USER
-RUN mkdir /app
-RUN chown -R $APPLICATION_USER /app
+# Use the Official OpenJDK image for a lean production stage of our multi-stage build.
+# https://hub.docker.com/_/openjdk
+# https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
+FROM openjdk:8-jre
 
-# Marks this container to use the specified $APPLICATION_USER
-USER $APPLICATION_USER
+# Copy the jar to the production image from the builder stage.
+COPY --from=builder /home/gradle/webscrambles/build/libs/webscrambles-1.0.3-all.jar /scrambler.jar
+#COPY --from=builder /home/gradle/build/libs/gradle.jar /scrambler.jar
 
-# We copy the FAT Jar we built into the /app folder and sets that folder as the working directory.
-COPY ./TNoodle-Build-latest.jar /app/tnoodle-application.jar
-WORKDIR /app
-
-# allow deployments to online Docker containers
-# (requires TNoodle to mangle with Java runtime, see WebscramblesServer#main for details)
-ARG ONLINE
-# If the arg ONLINE was passed, add flag
-ENV ONLINE_MODE=${ONLINE:+"--online"}
-# If no flag is present yet, explicitly assign an empty string
-ENV ONLINE_MODE=${ONLINE_MODE:-""}
-
-# We launch java to execute the jar, with good defauls intended for containers.
-CMD java -server -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:InitialRAMFraction=2 -XX:MinRAMFraction=2 -XX:MaxRAMFraction=2 -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication -jar tnoodle-application.jar $ONLINE_MODE
+# Run the web service on container startup.
+CMD [ "java", "-jar", "-Djava.security.egd=file:/dev/./urandom", "/scrambler.jar" ]
